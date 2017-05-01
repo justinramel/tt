@@ -7,6 +7,8 @@
             <div class="column is-two-thirds">
               <h1 class="title">TT Startsheets</h1>
               <h2 class="subtitle">2017</h2>
+              <RaceSelector></RaceSelector>
+              <ClubSelector></ClubSelector>
             </div>
             <div class="column">
               <Leaderboard></Leaderboard>
@@ -32,13 +34,6 @@
 
     <div class="container">
       <div class="content">
-
-        <div class="columns is-mobile">
-          <div class="column is-2 is-offset-10">
-            <b-checkbox v-model="groupByClub">Group by club</b-checkbox>
-          </div>
-        </div>
-
         <router-view></router-view>
       </div>
     </div>
@@ -55,13 +50,18 @@
 
 <script>
   import Leaderboard from './components/Leaderboard'
+  import RaceSelector from './components/RaceSelector'
+  import ClubSelector from './components/ClubSelector'
 
   export default {
     name: 'app',
     components: {
-      Leaderboard
+      Leaderboard,
+      RaceSelector,
+      ClubSelector
     },
     mounted () {
+      this.$store.dispatch('getRaces')
       this.$store.dispatch('getResults')
     },
     computed: {

@@ -5,29 +5,61 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    races: [],
     results: [],
+    filteredResults: [],
     leaderboard: [],
-    groupByClub: false
+    club: ''
   },
   mutations: {
-    addResults (state, results) {
-      state.results = results
+    addRaces (state, races) {
+      Vue.set(state, 'races', races)
     },
-    addLeaderboard (state, results) {
-      state.leaderboard = createLeaderboard(results)
+    updateResults (state, results) {
+      Vue.set(state, 'results', results)
     },
-    setGroupByClub (state, value) {
-      Vue.set(state, 'groupByClub', value)
+    updateLeaderboard (state, results) {
+      Vue.set(state, 'leaderboard', createLeaderboard(results))
+    },
+    updateFilteredResults (state, results) {
+      Vue.set(state, 'filteredResults', results)
+    },
+    setClub (state, value) {
+      Vue.set(state, 'club', value)
     }
   },
   actions: {
-    getResults (context) {
+    getRaces (context) {
+      let races = []
+      const ds = new Miso.Dataset({
+        importer: Miso.Dataset.Importers.GoogleSpreadsheet,
+        parser: Miso.Dataset.Parsers.GoogleSpreadsheet,
+        key: '1vZHQOwEGtwsLn_VD_0pXWHBC6yy5W2e-Zt4pOYEC3Us',
+        worksheet: '1'
+      })
+
+      ds.fetch({
+        success: function () {
+          this.each(function (row) {
+            races.push(row)
+          })
+          context.commit('addRaces', races)
+        },
+        error: function (err) {
+          console.log(err)
+        }
+      })
+    },
+    setRaceWorksheet (context, worksheet) {
+      context.dispatch('getResults', worksheet)
+    },
+    getResults (context, worksheet) {
       let results = []
       const ds = new Miso.Dataset({
         importer: Miso.Dataset.Importers.GoogleSpreadsheet,
         parser: Miso.Dataset.Parsers.GoogleSpreadsheet,
         key: '1vZHQOwEGtwsLn_VD_0pXWHBC6yy5W2e-Zt4pOYEC3Us',
-        worksheet: '2'
+        worksheet: worksheet
       })
 
       ds.fetch({
@@ -35,18 +67,37 @@ export default new Vuex.Store({
           this.each(function (row) {
             results.push(row)
           })
-          context.commit('addResults', results)
-          context.commit('addLeaderboard', results)
+          context.commit('updateResults', results)
+          context.commit('updateFilteredResults', results)
+          context.commit('updateLeaderboard', results)
         },
         error: function (err) {
           console.log(err)
         }
       })
+    },
+    setClub (context, club) {
+      let filteredResults = []
+      if (club === '') {
+        filteredResults = context.state.results
+      } else {
+        filteredResults = context.state.results.filter(result => result.Club === club)
+      }
+      context.commit('updateFilteredResults', filteredResults)
+      context.commit('updateLeaderboard', filteredResults)
+      context.commit('setClub', club)
     }
   },
   getters: {
     getResultsSortedBy: (state, getters) => (fieldName) => {
-      return state.results.sort(sortTime(fieldName, state.groupByClub))
+      return state.filteredResults.sort(sortTime(fieldName, state.groupByClub))
+    },
+    getClubs: (state, getters) => () => {
+      const clubs = state.results.map(result => result.Club)
+      const uniqueClubs = [...new Set(clubs)]
+      return uniqueClubs.sort((a, b) => a.localeCompare(b)).map(club => {
+        return {name: club}
+      })
     }
   }
 })
