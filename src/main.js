@@ -3,6 +3,7 @@
 import Vue from 'vue'
 import Buefy from 'buefy'
 
+import store from './store'
 import App from './App'
 import router from './router'
 
@@ -13,6 +14,7 @@ Vue.use(Buefy)
 new Vue({
   el: '#app',
   router,
+  store,
   template: '<App/>',
   components: { App }
 })
