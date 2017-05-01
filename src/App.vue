@@ -8,15 +8,15 @@
               <h1 class="title">TT Startsheets</h1>
               <h2 class="subtitle">2017</h2>
               <RaceSelector></RaceSelector>
-              <ClubSelector></ClubSelector>
+              <ClubSelector v-show="hasRace"></ClubSelector>
             </div>
             <div class="column">
-              <Leaderboard></Leaderboard>
+              <Leaderboard v-show="hasRace"></Leaderboard>
             </div>
           </div>
         </div>
       </div>
-      <div class="hero-foot">
+      <div class="hero-foot" v-show="hasRace">
         <nav class="tabs is-boxed">
           <div class="container">
             <ul>
@@ -34,7 +34,7 @@
 
     <div class="container">
       <div class="content">
-        <router-view></router-view>
+        <router-view v-show="hasRace"></router-view>
       </div>
     </div>
 
@@ -62,16 +62,10 @@
     },
     mounted () {
       this.$store.dispatch('getRaces')
-      this.$store.dispatch('getResults')
     },
     computed: {
-      groupByClub: {
-        get () {
-          return this.$store.state.groupByClub
-        },
-        set (value) {
-          this.$store.commit('setGroupByClub', value)
-        }
+      hasRace () {
+        return this.$store.getters.hasRace()
       }
     }
   }

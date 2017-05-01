@@ -9,6 +9,7 @@ export default new Vuex.Store({
     results: [],
     filteredResults: [],
     leaderboard: [],
+    race: '',
     club: ''
   },
   mutations: {
@@ -23,6 +24,9 @@ export default new Vuex.Store({
     },
     updateFilteredResults (state, results) {
       Vue.set(state, 'filteredResults', results)
+    },
+    setRace (state, value) {
+      Vue.set(state, 'race', value)
     },
     setClub (state, value) {
       Vue.set(state, 'club', value)
@@ -51,9 +55,6 @@ export default new Vuex.Store({
       })
     },
     setRaceWorksheet (context, worksheet) {
-      context.dispatch('getResults', worksheet)
-    },
-    getResults (context, worksheet) {
       let results = []
       const ds = new Miso.Dataset({
         importer: Miso.Dataset.Importers.GoogleSpreadsheet,
@@ -67,6 +68,7 @@ export default new Vuex.Store({
           this.each(function (row) {
             results.push(row)
           })
+          context.commit('setRace', worksheet)
           context.commit('updateResults', results)
           context.commit('updateFilteredResults', results)
           context.commit('updateLeaderboard', results)
@@ -89,6 +91,9 @@ export default new Vuex.Store({
     }
   },
   getters: {
+    hasRace: (state, getters) => () => {
+      return state.race !== ''
+    },
     getResultsSortedBy: (state, getters) => (fieldName) => {
       return state.filteredResults.sort(sortTime(fieldName, state.groupByClub))
     },
