@@ -3,7 +3,7 @@
     <b-select
       v-model="club"
       placeholder="Filter by Club"
-      size="is-medium"
+      size="is-large"
       expanded>
       <b-option
         v-for="option in options"
@@ -14,7 +14,7 @@
     </b-select>
     <p class="control">
       <button
-        class="button is-danger is-medium"
+        class="button is-danger is-large"
         @click="club = ''">
         <b-icon icon="clear"></b-icon>
       </button>

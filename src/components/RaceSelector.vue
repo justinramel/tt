@@ -12,6 +12,13 @@
         {{ option.RaceName }}
       </b-option>
     </b-select>
+    <p class="control">
+      <button
+        class="button is-danger is-large"
+        @click="race = ''">
+        <b-icon icon="clear"></b-icon>
+      </button>
+    </p>
   </b-field>
 </template>
 <script>
