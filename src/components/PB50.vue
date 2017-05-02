@@ -5,6 +5,7 @@
     :striped=true
     :narrowed=true
     :selectable=true>
+    <b-table-column field="Order" label="Pos" sortable/>
     <b-table-column field="Start Number" label="No" sortable/>
     <b-table-column field="Start Time" label="Start Time" sortable :custom-sort="byStartTime"/>
     <b-table-column field="Rider" label="Rider" sortable/>

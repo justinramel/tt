@@ -9,7 +9,7 @@
         v-for="option in options"
         :value="option.Worksheet"
         :key="option.Worksheet">
-        {{ option.RaceName }}
+        {{ option.Name }}
       </b-option>
     </b-select>
     <p class="control">

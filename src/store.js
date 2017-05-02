@@ -72,6 +72,7 @@ export default new Vuex.Store({
           context.commit('updateResults', results)
           context.commit('updateFilteredResults', results)
           context.commit('updateLeaderboard', results)
+          context.dispatch('setClub', context.state.club)
         },
         error: function (err) {
           console.log(err)
@@ -91,11 +92,13 @@ export default new Vuex.Store({
     }
   },
   getters: {
-    hasRace: (state, getters) => () => {
-      return state.race !== ''
-    },
+    hasRace: (state, getters) => () => state.race !== '',
     getResultsSortedBy: (state, getters) => (fieldName) => {
-      return state.filteredResults.sort(sortTime(fieldName, state.groupByClub))
+      var results = state.filteredResults.sort(sortTime(fieldName, state.groupByClub))
+      for (var i = 0; i < results.length; i++) {
+        results[i].Order = i + 1
+      }
+      return results
     },
     getClubs: (state, getters) => () => {
       const clubs = state.results.map(result => result.Club)
@@ -103,6 +106,17 @@ export default new Vuex.Store({
       return uniqueClubs.sort((a, b) => a.localeCompare(b)).map(club => {
         return {name: club}
       })
+    },
+    getRiderCount: (state, getters) => () => {
+      return state.filteredResults.length > 0 ? ` - ${state.filteredResults.length} Riders` : ''
+    },
+    getRaceTitle: (state, getters) => () => {
+      if (getters.hasRace()) {
+        const race = state.races[state.race - 2]
+        return race.Title
+      } else {
+        return ''
+      }
     }
   }
 })

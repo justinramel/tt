@@ -9,6 +9,9 @@
               <h2 class="subtitle">2017</h2>
               <RaceSelector></RaceSelector>
               <ClubSelector v-show="hasRace"></ClubSelector>
+              <b-field>
+                <h1 class="title">{{raceTitle}} {{club}} {{riderCount}}</h1>
+              </b-field>
             </div>
             <div class="column">
               <Leaderboard v-show="hasRace"></Leaderboard>
@@ -66,6 +69,15 @@
     computed: {
       hasRace () {
         return this.$store.getters.hasRace()
+      },
+      raceTitle () {
+        return this.$store.getters.getRaceTitle()
+      },
+      club () {
+        return this.$store.state.club
+      },
+      riderCount () {
+        return this.$store.getters.getRiderCount()
       }
     }
   }
