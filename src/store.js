@@ -1,6 +1,8 @@
 /* global Miso */
 import Vue from 'vue'
 import Vuex from 'vuex'
+import slugify from './slugify'
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -55,6 +57,11 @@ export default new Vuex.Store({
       })
     },
     setRaceWorksheet (context, worksheet) {
+      if (context.state.race === worksheet) {
+        context.dispatch('setClub', '')
+        return
+      }
+
       let results = []
       const ds = new Miso.Dataset({
         importer: Miso.Dataset.Importers.GoogleSpreadsheet,
@@ -70,9 +77,7 @@ export default new Vuex.Store({
           })
           context.commit('setRace', worksheet)
           context.commit('updateResults', results)
-          context.commit('updateFilteredResults', results)
-          context.commit('updateLeaderboard', results)
-          context.dispatch('setClub', context.state.club)
+          context.dispatch('setClub', '')
         },
         error: function (err) {
           console.log(err)
@@ -84,7 +89,7 @@ export default new Vuex.Store({
       if (club === '') {
         filteredResults = context.state.results
       } else {
-        filteredResults = context.state.results.filter(result => result.Club === club)
+        filteredResults = context.state.results.filter(result => slugify(result.Club) === club)
       }
       context.commit('updateFilteredResults', filteredResults)
       context.commit('updateLeaderboard', filteredResults)

@@ -24,13 +24,30 @@
 <script>
   export default {
     name: 'race-selector',
+    props: ['worksheet'],
+    created () {
+      this.fetchData()
+    },
+    methods: {
+      fetchData () {
+        if (!this.$props.worksheet) return
+        this.$store.dispatch('setRaceWorksheet', this.$props.worksheet)
+      }
+    },
+    watch: {
+      '$route': 'fetchData'
+    },
     computed: {
       race: {
         get () {
-          return this.$store.state.raceWorksheet
+          return this.$props.worksheet
         },
-        set (value) {
-          this.$store.dispatch('setRaceWorksheet', value)
+        set (worksheet) {
+          if (worksheet) {
+            this.$router.push({name: 'startsheet', params: {worksheet}})
+          } else {
+            this.$router.push({name: 'root'})
+          }
         }
       },
       options () {

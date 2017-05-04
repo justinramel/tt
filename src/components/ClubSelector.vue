@@ -22,15 +22,37 @@
   </b-field>
 </template>
 <script>
+  import slugify from '../slugify'
+
   export default {
     name: 'club-selector',
+    props: ['worksheet', 'name'],
+    created () {
+      this.fetchData()
+    },
+    methods: {
+      fetchData () {
+        if (!this.$props.name) return
+        this.$store.dispatch('setClub', this.$props.name)
+      }
+    },
+    watch: {
+      // call again the method if the route changes
+      '$route': 'fetchData'
+    },
     computed: {
       club: {
         get () {
-          return this.$store.state.club
+          return this.$props.name
         },
-        set (value) {
-          this.$store.dispatch('setClub', value)
+        set (name) {
+          if (name) {
+            debugger
+            name = slugify(name)
+            this.$router.push({name: 'club-startsheet', params: {name}})
+          } else {
+            this.$router.push({name: 'startsheet', params: {worksheet: this.$props.worksheet}})
+          }
         }
       },
       options () {
