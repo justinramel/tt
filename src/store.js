@@ -1,6 +1,8 @@
 /* global Miso */
 import Vue from 'vue'
 import Vuex from 'vuex'
+import slugify from './slugify'
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -54,13 +56,19 @@ export default new Vuex.Store({
         }
       })
     },
-    setRaceWorksheet (context, worksheet) {
+    setRaceWorksheet (context, params) {
+      if (empty(params.worksheet)) return
+      if (context.state.race === params.worksheet) {
+        context.dispatch('setClub', params.name)
+        return
+      }
+
       let results = []
       const ds = new Miso.Dataset({
         importer: Miso.Dataset.Importers.GoogleSpreadsheet,
         parser: Miso.Dataset.Parsers.GoogleSpreadsheet,
         key: '1vZHQOwEGtwsLn_VD_0pXWHBC6yy5W2e-Zt4pOYEC3Us',
-        worksheet: worksheet
+        worksheet: params.worksheet
       })
 
       ds.fetch({
@@ -68,27 +76,33 @@ export default new Vuex.Store({
           this.each(function (row) {
             results.push(row)
           })
-          context.commit('setRace', worksheet)
+          context.commit('setRace', params.worksheet)
           context.commit('updateResults', results)
-          context.commit('updateFilteredResults', results)
-          context.commit('updateLeaderboard', results)
-          context.dispatch('setClub', context.state.club)
+          context.dispatch('setClub', params.name)
         },
         error: function (err) {
           console.log(err)
         }
       })
     },
-    setClub (context, club) {
+    setClub (context, name) {
       let filteredResults = []
-      if (club === '') {
+      if (empty(name)) {
         filteredResults = context.state.results
       } else {
-        filteredResults = context.state.results.filter(result => result.Club === club)
+        filteredResults = context.state.results.filter(result => slugify(result.Club) === name)
+        name = filteredResults[0].Club
       }
       context.commit('updateFilteredResults', filteredResults)
       context.commit('updateLeaderboard', filteredResults)
-      context.commit('setClub', club)
+      context.commit('setClub', name)
+    },
+    clear (context) {
+      context.commit('updateResults', [])
+      context.commit('updateLeaderboard', [])
+      context.commit('updateFilteredResults', [])
+      context.commit('setRace', '')
+      context.commit('setClub', '')
     }
   },
   getters: {
@@ -104,7 +118,7 @@ export default new Vuex.Store({
       const clubs = state.results.map(result => result.Club)
       const uniqueClubs = [...new Set(clubs)]
       return uniqueClubs.sort((a, b) => a.localeCompare(b)).map(club => {
-        return {name: club}
+        return {key: slugify(club), name: club}
       })
     },
     getRiderCount: (state, getters) => () => {
@@ -160,7 +174,7 @@ function sortTime (columnName, groupByClub) {
   }
 }
 
-function empty (data) {
+export function empty (data) {
   if (typeof (data) === 'number' || typeof (data) === 'boolean') {
     return false
   }

@@ -7,8 +7,8 @@
       expanded>
       <b-option
         v-for="option in options"
-        :value="option.name"
-        :key="option.name">
+        :value="option.key"
+        :key="option.keye">
         {{ option.name }}
       </b-option>
     </b-select>
@@ -22,15 +22,22 @@
   </b-field>
 </template>
 <script>
+  import slugify from '../slugify'
+
   export default {
     name: 'club-selector',
+    props: ['name'],
     computed: {
       club: {
         get () {
-          return this.$store.state.club
+          return this.$props.name
         },
-        set (value) {
-          this.$store.dispatch('setClub', value)
+        set (name) {
+          if (name) {
+            this.$router.push({name: 'club-startsheet', params: {name: slugify(name)}})
+          } else {
+            this.$router.push({name: 'startsheet'})
+          }
         }
       },
       options () {

@@ -22,15 +22,34 @@
   </b-field>
 </template>
 <script>
+  import store, {empty} from '../store'
+
   export default {
     name: 'race-selector',
+    props: ['worksheet', 'race'],
+    beforeRouteEnter (to, from, next) {
+      if (to.name === 'root') {
+        store.dispatch('clear').then(() => next())
+      } else {
+        store.dispatch('setRaceWorksheet', to.params).then(() => next())
+      }
+    },
+    beforeRouteUpdate (to, from, next) {
+      store.dispatch('setRaceWorksheet', to.params).then(() => next())
+    },
     computed: {
       race: {
         get () {
-          return this.$store.state.raceWorksheet
+          return this.$props.worksheet
         },
-        set (value) {
-          this.$store.dispatch('setRaceWorksheet', value)
+        set (worksheet) {
+          if (empty(worksheet)) {
+            this.$router.push({name: 'root'})
+          } else {
+            if (worksheet !== this.$props.worksheet) {
+              this.$router.push({name: 'startsheet', params: {worksheet}})
+            }
+          }
         }
       },
       options () {

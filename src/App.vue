@@ -5,39 +5,26 @@
         <div class="container">
           <div class="columns">
             <div class="column is-two-thirds">
-              <h1 class="title">TT Startsheets</h1>
+              <h1 class="title"><router-link to="/"><a>TT Startsheets</a></router-link></h1>
               <h2 class="subtitle">2017</h2>
-              <RaceSelector></RaceSelector>
-              <ClubSelector v-show="hasRace"></ClubSelector>
-              <b-field>
-                <h1 class="title">{{raceTitle}} {{club}} {{riderCount}}</h1>
-              </b-field>
+              <router-view></router-view>
+              <router-view name="club"></router-view>
+              <router-view name="raceTitle"></router-view>
             </div>
             <div class="column">
-              <Leaderboard v-show="hasRace"></Leaderboard>
+              <router-view name="leaderboard"></router-view>
             </div>
           </div>
         </div>
       </div>
-      <div class="hero-foot" v-show="hasRace">
-        <nav class="tabs is-boxed">
-          <div class="container">
-            <ul>
-              <router-link tag="li" to="/"><a>Startsheet</a></router-link>
-              <router-link tag="li" to="/PB10"><a>PB 10</a></router-link>
-              <router-link tag="li" to="/PB25"><a>PB 25</a></router-link>
-              <router-link tag="li" to="/PB50"><a>PB 50</a></router-link>
-              <router-link tag="li" to="/PB100"><a>PB 100</a></router-link>
-              <router-link tag="li" to="/Result"><a>Best Result</a></router-link>
-            </ul>
-          </div>
-        </nav>
+      <div class="hero-foot">
+        <router-view name="tabs"></router-view>
       </div>
     </div>
 
     <div class="container">
       <div class="content">
-        <router-view v-show="hasRace"></router-view>
+        <router-view name="tables"></router-view>
       </div>
     </div>
 
@@ -53,32 +40,14 @@
 
 <script>
   import Leaderboard from './components/Leaderboard'
-  import RaceSelector from './components/RaceSelector'
-  import ClubSelector from './components/ClubSelector'
 
   export default {
     name: 'app',
     components: {
-      Leaderboard,
-      RaceSelector,
-      ClubSelector
+      Leaderboard
     },
     mounted () {
       this.$store.dispatch('getRaces')
-    },
-    computed: {
-      hasRace () {
-        return this.$store.getters.hasRace()
-      },
-      raceTitle () {
-        return this.$store.getters.getRaceTitle()
-      },
-      club () {
-        return this.$store.state.club
-      },
-      riderCount () {
-        return this.$store.getters.getRiderCount()
-      }
     }
   }
 </script>
