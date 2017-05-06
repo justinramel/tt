@@ -5,7 +5,7 @@
         <div class="container">
           <div class="columns">
             <div class="column is-two-thirds">
-              <h1 class="title">TT Startsheets</h1>
+              <h1 class="title"><router-link to="/"><a>TT Startsheets</a></router-link></h1>
               <h2 class="subtitle">2017</h2>
               <router-view></router-view>
               <router-view name="club"></router-view>
