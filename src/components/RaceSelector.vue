@@ -26,7 +26,7 @@
 
   export default {
     name: 'race-selector',
-    props: ['worksheet', 'race'],
+    props: ['worksheet'],
     beforeRouteEnter (to, from, next) {
       if (to.name === 'root') {
         store.dispatch('clear').then(() => next())
