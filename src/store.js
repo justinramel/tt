@@ -21,8 +21,8 @@ export default new Vuex.Store({
     updateResults (state, results) {
       Vue.set(state, 'results', results)
     },
-    updateLeaderboard (state, results) {
-      Vue.set(state, 'leaderboard', createLeaderboard(results))
+    updateLeaderboard (state, payload) {
+      Vue.set(state, 'leaderboard', createLeaderboard(payload.race, payload.results))
     },
     updateFilteredResults (state, results) {
       Vue.set(state, 'filteredResults', results)
@@ -94,12 +94,12 @@ export default new Vuex.Store({
         name = filteredResults[0].Club
       }
       context.commit('updateFilteredResults', filteredResults)
-      context.commit('updateLeaderboard', filteredResults)
+      context.commit('updateLeaderboard', {race: context.getters.getRaceTitle(), results: filteredResults})
       context.commit('setClub', name)
     },
     clear (context) {
       context.commit('updateResults', [])
-      context.commit('updateLeaderboard', [])
+      context.commit('updateLeaderboard', {results: []})
       context.commit('updateFilteredResults', [])
       context.commit('setRace', '')
       context.commit('setClub', '')
@@ -108,7 +108,7 @@ export default new Vuex.Store({
   getters: {
     hasRace: (state, getters) => () => state.race !== '',
     getResultsSortedBy: (state, getters) => (fieldName) => {
-      var results = state.filteredResults.sort(sortTime(fieldName, state.groupByClub))
+      var results = state.filteredResults.sort(sortTime(getters.getRaceTitle(), fieldName, state.groupByClub))
       for (var i = 0; i < results.length; i++) {
         results[i].Order = i + 1
       }
@@ -135,13 +135,13 @@ export default new Vuex.Store({
   }
 })
 
-function createLeaderboard (results) {
+function createLeaderboard (race, results) {
   return [
-    {category: 'PB 10', leader: first(results.sort(sortTime('PB 10')), 'PB 10')},
-    {category: 'PB 25', leader: first(results.sort(sortTime('PB 25')), 'PB 25')},
-    {category: 'PB 50', leader: first(results.sort(sortTime('PB 50')), 'PB 50')},
-    {category: 'PB 100', leader: first(results.sort(sortTime('PB 100')), 'PB 100')},
-    {category: 'Best Result', leader: first(results.sort(sortTime('Result')), 'Result')}
+    {category: 'PB 10', leader: first(results.sort(sortTime(race, 'PB 10')), 'PB 10')},
+    {category: 'PB 25', leader: first(results.sort(sortTime(race, 'PB 25')), 'PB 25')},
+    {category: 'PB 50', leader: first(results.sort(sortTime(race, 'PB 50')), 'PB 50')},
+    {category: 'PB 100', leader: first(results.sort(sortTime(race, 'PB 100')), 'PB 100')},
+    {category: 'Best Result', leader: first(results.sort(sortTime(race, 'Result')), 'Result')}
   ]
 }
 
@@ -159,10 +159,17 @@ function first (results, fieldName) {
   }
 }
 
-function sortTime (columnName, groupByClub) {
+function sortTime (race, columnName, groupByClub) {
   return function sort (a, b) {
     if (groupByClub && a.Club !== b.Club) {
       return a.Club < b.Club ? -1 : 1
+    }
+    if (columnName === 'Result' && a.Course !== b.Course) {
+      if (a.Course && a.Course.toLowerCase() === race.toLowerCase()) return -1
+      if (b.Course && b.Course.toLowerCase() === race.toLowerCase()) return 1
+      let aCourse = a.Course || ''
+      let bCourse = b.Course || ''
+      return aCourse > bCourse ? -1 : 1
     }
     const colA = a[columnName]
     const colB = b[columnName]
